@@ -1,0 +1,6 @@
+
+TOPSRCDIR   = $$PWD
+TOPBUILDDIR = $$shadowed($$PWD)
+
+DESTDIR 	= $$TOPBUILDDIR/output
+
