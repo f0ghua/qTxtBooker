@@ -4,6 +4,8 @@
 #include <QDialog>
 #include <QtWidgets>
 
+namespace QCC {
+	
 class AboutDialog : public QDialog
 {
     Q_OBJECT
@@ -28,5 +30,7 @@ private:
 	QGridLayout *m_gridLayoutOptInfo2;
 	QLabel *m_labelOptInfo2;
 };
+
+}
 
 #endif // ABOUTDIALOG_H

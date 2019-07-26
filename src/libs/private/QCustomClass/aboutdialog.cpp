@@ -14,6 +14,9 @@
 		- QLable
 
  */
+
+using namespace QCC;
+
 AboutDialog::AboutDialog(QWidget *parent) :
 	QDialog(parent)
 {
