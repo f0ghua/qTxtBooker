@@ -76,7 +76,7 @@ bool Worker::requestBookPages(const QString &urlStr)
         QString title = match.captured(2);
         QString linkAddr;
         const QUrl &url = m_siteInfo.m_url;
-        if (url.path().contains('.')) {
+        if (!urlStr.endsWith('/')) {
             // there is a file name exist
             linkAddr = url.scheme() + "://" + url.host() + sublink;
         } else {
@@ -113,7 +113,7 @@ bool Worker::pullBookPages(int start, int end)
         }
 
         //content.replace("\r\n", "");
-        //content.replace("<br />", "@");
+        content.replace("<br />", "@");
         //content.replace("<br/>", "@");
         //content.replace("</br>", "@");
         //content.replace("<br>", "@");
@@ -124,6 +124,7 @@ bool Worker::pullBookPages(int start, int end)
         //qDebug() << pattern;
         //qDebug() << content;
         QRegularExpression re(pattern);
+        re.setPatternOptions(QRegularExpression::DotMatchesEverythingOption | QRegularExpression::InvertedGreedinessOption);
         QRegularExpressionMatch match = re.match(content);
         bool hasMatch = match.hasMatch(); // true
         if (!hasMatch) {
