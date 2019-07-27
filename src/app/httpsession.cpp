@@ -32,7 +32,7 @@ void HttpSession::fileDownloaded(QNetworkReply *reply)
     emit downloaded();
 }
 
-void HttpSession::requestUrl2File(QUrl url, const QString &fileName)
+QByteArray HttpSession::requestUrl2File(QUrl url, const QString &fileName)
 {
     QNetworkRequest request(url);
     m_webCtrl.get(request);
@@ -42,8 +42,10 @@ void HttpSession::requestUrl2File(QUrl url, const QString &fileName)
     loop.exec();
 
     QFile localFile(fileName);
-    if (!localFile.open(QIODevice::WriteOnly))
-        return;
-    localFile.write(m_downloadedData);
-    localFile.close();
+    if (localFile.open(QIODevice::WriteOnly)) {
+        localFile.write(m_downloadedData);
+        localFile.close();
+    }
+
+    return m_downloadedData;
 }

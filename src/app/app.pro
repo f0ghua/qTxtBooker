@@ -31,7 +31,8 @@ SOURCES += \
     httpsession.cpp \
     regex_helper.cpp \
     ini.cpp \
-    encodecvt.cpp
+    encodecvt.cpp \
+    qcompressor.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -39,7 +40,8 @@ HEADERS += \
     httpsession.h \
     encodecvt.h \
     ini.h \
-    regex_helper.h
+    regex_helper.h \
+    qcompressor.h
 
 FORMS += \
         mainwindow.ui

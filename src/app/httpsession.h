@@ -14,7 +14,7 @@ public:
     explicit HttpSession(QUrl url, QObject *parent = 0);
     virtual ~HttpSession() {}
 
-    void requestUrl2File(QUrl url, const QString &fileName);
+    QByteArray requestUrl2File(QUrl url, const QString &fileName);
     void setUrl(QUrl url) {m_reqUrl = url;}
     void requestUrl();
 

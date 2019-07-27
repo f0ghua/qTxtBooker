@@ -18,6 +18,14 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
+public slots:
+    void onIndexDownloaded();
+    void onPageDownloaded(int index);
+
+private slots:
+    void on_pbReqPages_clicked();
+    void on_pbPullPages_clicked();
+
 private:
     void startWorker();
     void stopWorker();
