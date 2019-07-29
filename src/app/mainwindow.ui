@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>qTxtBooker</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout_2">
@@ -106,7 +106,7 @@
      <x>0</x>
      <y>0</y>
      <width>499</width>
-     <height>17</height>
+     <height>23</height>
     </rect>
    </property>
   </widget>

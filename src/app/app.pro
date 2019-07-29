@@ -46,7 +46,10 @@ HEADERS += \
 FORMS += \
         mainwindow.ui
 
+RC_FILE = app.rc
+
 LIBS += -lz
 
 include($${TOPSRCDIR}/src/libs/private/QAppLogging/QAppLogging.pri)
 		
+
