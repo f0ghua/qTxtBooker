@@ -7,15 +7,26 @@
 #include <QRegularExpression>
 #include <QSettings>
 #include <QTextCodec>
+#include <QCoreApplication>
 
 static const char * const KEY_LINK_ENCODE       = "encode";
 static const char * const KEY_LINK_STR_START    = "link_str_start";
 static const char * const KEY_LINK_STR_END      = "link_str_end";
 static const char * const KEY_LINK_PATTERN      = "link_pattern";
 static const char * const KEY_CONTENT_PATTERN   = "content_pattern";
+static const char * const KEY_INTERVAL          = "interval";
 static const char * const INDEX_PAGE_FNAME      = "./index.html";
 static const char * const BOOK_PAGE_FNAME       = "./page.html";
 static const char * const BOOK_SAVE_FNAME       = "./out.txt";
+
+static void msleep(int ms)
+{
+    QTime dieTime = QTime::currentTime().addMSecs(ms);
+
+    while (QTime::currentTime() < dieTime) {
+        QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
+    }
+}
 
 static inline QString GBK2UTF8(const QByteArray &ba)
 {
@@ -144,6 +155,10 @@ bool Worker::pullBookPages(int start, int end)
         out << "\r\n";
 
         emit pageDownloaded(index);
+
+        if (m_siteInfo.m_interval) {
+            msleep(m_siteInfo.m_interval);
+        }
     }
 
     outFile->close();
@@ -169,6 +184,7 @@ bool Worker::loadSiteConfigs(const QUrl &url)
             m_siteInfo.m_linkEnd = cfg->value(KEY_LINK_STR_END).toString();
             m_siteInfo.m_linkPattern = cfg->value(KEY_LINK_PATTERN).toString();
             m_siteInfo.m_bookPattern = cfg->value(KEY_CONTENT_PATTERN).toString();
+            m_siteInfo.m_interval = cfg->value(KEY_INTERVAL, 0).toInt();
             cfg->endGroup();
 
             isSupport = true;

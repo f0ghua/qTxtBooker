@@ -14,6 +14,7 @@ struct SiteInfo {
     QString m_linkEnd;
     QString m_linkPattern;
     QString m_bookPattern;
+    int m_interval = 0;
 };
 
 struct PageInfo {

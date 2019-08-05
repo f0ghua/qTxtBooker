@@ -25,23 +25,24 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 
 SOURCES += \
-        main.cpp \
-        mainwindow.cpp \
+    main.cpp \
+    mainwindow.cpp \
     worker.cpp \
     httpsession.cpp \
-    regex_helper.cpp \
-    ini.cpp \
-    encodecvt.cpp \
     qcompressor.cpp
+#    regex_helper.cpp \
+#    ini.cpp \
+#    encodecvt.cpp \
 
 HEADERS += \
         mainwindow.h \
     worker.h \
     httpsession.h \
-    encodecvt.h \
-    ini.h \
-    regex_helper.h \
     qcompressor.h
+#    encodecvt.h \
+#    ini.h \
+#    regex_helper.h \
+
 
 FORMS += \
         mainwindow.ui
