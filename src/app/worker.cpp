@@ -15,6 +15,7 @@ static const char * const KEY_LINK_STR_END      = "link_str_end";
 static const char * const KEY_LINK_PATTERN      = "link_pattern";
 static const char * const KEY_CONTENT_PATTERN   = "content_pattern";
 static const char * const KEY_INTERVAL          = "interval";
+static const char * const KEY_LINKTYPE          = "link_type";
 static const char * const INDEX_PAGE_FNAME      = "./index.html";
 static const char * const BOOK_PAGE_FNAME       = "./page.html";
 static const char * const BOOK_SAVE_FNAME       = "./out.txt";
@@ -87,12 +88,25 @@ bool Worker::requestBookPages(const QString &urlStr)
         QString title = match.captured(2);
         QString linkAddr;
         const QUrl &url = m_siteInfo.m_url;
-        if (!urlStr.endsWith('/')) {
-            // there is a file name exist
-            linkAddr = url.scheme() + "://" + url.host() + sublink;
-        } else {
-            linkAddr = url.toString() + sublink;
+        switch (m_siteInfo.m_linkType) {
+            case 0: {
+                linkAddr = url.scheme() + "://" + url.host() + sublink;
+                break;
+            }
+            case 1: {
+                linkAddr = url.toString() + sublink;
+                break;
+            }
+            case 2: {
+                QString strUrl = url.toString();
+                int pos = strUrl.lastIndexOf('/');
+                linkAddr = strUrl.left(pos) + "/" + sublink;
+                break;
+            }
+            default:
+                break;
         }
+
         m_pageInfos.append(PageInfo(linkAddr, title));
         //qDebug() << link << title;
     }
@@ -185,6 +199,8 @@ bool Worker::loadSiteConfigs(const QUrl &url)
             m_siteInfo.m_linkPattern = cfg->value(KEY_LINK_PATTERN).toString();
             m_siteInfo.m_bookPattern = cfg->value(KEY_CONTENT_PATTERN).toString();
             m_siteInfo.m_interval = cfg->value(KEY_INTERVAL, 0).toInt();
+            m_siteInfo.m_linkType = cfg->value(KEY_LINKTYPE, 0).toInt();
+
             cfg->endGroup();
 
             isSupport = true;
