@@ -7,8 +7,8 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
 	
     QAppLogging::installHandler();
-    //QAppLogging::instance()->setOutputDest(QAppLogging::eDestFile|QAppLogging::eDestSystem);
-    //QAppLogging::instance()->setLogFilePath("log_sapaUSBTool.txt");
+    QAppLogging::instance()->setOutputDest(QAppLogging::eDestFile|QAppLogging::eDestSystem);
+    QAppLogging::instance()->setLogFilePath("log.txt", "log");
     qInfo() << "App is initializing ...";
 	
     MainWindow w;
