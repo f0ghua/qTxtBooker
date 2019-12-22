@@ -128,6 +128,9 @@ bool Worker::pullBookPages(int start, int end)
     for (int index = start; index <= end; index++) {
         const PageInfo &pi = m_pageInfos.at(index);
         const QString &urlStr = pi.m_linkAddr;
+
+        QLOG_DEBUG() << "request page url =" << urlStr;
+
         QUrl url(urlStr);
         QByteArray ba = m_session->requestUrl2File(url, BOOK_PAGE_FNAME);
         QString content;
