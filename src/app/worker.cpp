@@ -162,6 +162,9 @@ bool Worker::pullBookPages(int start, int end)
 
         QString matchedContent = match.captured(1);
         matchedContent.replace("&nbsp;", " ");
+        matchedContent.replace("&hellip;", "...");
+        matchedContent.replace("&ldquo;", "\"");
+        matchedContent.replace("&rdquo;", "\"");
         matchedContent.replace(" ", "");
         matchedContent.replace("@@", "@");
         matchedContent.replace("@", "\r\n");
