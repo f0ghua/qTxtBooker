@@ -2,12 +2,14 @@
 #include "httpsession.h"
 #include "qcompressor.h"
 #include "QAppLogging.h"
+#include "htmlentityparser.h"
 
 #include <QFile>
 #include <QRegularExpression>
 #include <QSettings>
 #include <QTextCodec>
 #include <QCoreApplication>
+#include <QTextDocument>
 
 static const char * const KEY_LINK_ENCODE       = "encode";
 static const char * const KEY_LINK_STR_START    = "link_str_start";
@@ -116,6 +118,27 @@ bool Worker::requestBookPages(const QString &urlStr)
     return true;
 }
 
+static inline void htmlRemoveEscape(QString &escapedStr)
+{
+#if 0
+    escapedStr.replace("&nbsp;", " ");
+    escapedStr.replace("&hellip;", "...");
+    escapedStr.replace("&ldquo;", "\"");
+    escapedStr.replace("&rdquo;", "\"");
+#else
+
+//    HtmlEntityParser ep;
+//    escapedStr = ep.parseText(escapedStr);
+
+    QTextDocument doc;
+    doc.setHtml(escapedStr);
+    escapedStr = doc.toPlainText();
+
+    //qDebug("%s.", qPrintable(escapedStr));
+
+#endif
+}
+
 bool Worker::pullBookPages(int start, int end)
 {
     QFile *outFile = new QFile(BOOK_SAVE_FNAME);
@@ -161,10 +184,8 @@ bool Worker::pullBookPages(int start, int end)
         }
 
         QString matchedContent = match.captured(1);
-        matchedContent.replace("&nbsp;", " ");
-        matchedContent.replace("&hellip;", "...");
-        matchedContent.replace("&ldquo;", "\"");
-        matchedContent.replace("&rdquo;", "\"");
+
+        htmlRemoveEscape(matchedContent);
         matchedContent.replace(" ", "");
         matchedContent.replace("@@", "@");
         matchedContent.replace("@", "\r\n");

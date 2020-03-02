@@ -29,7 +29,8 @@ SOURCES += \
     mainwindow.cpp \
     worker.cpp \
     httpsession.cpp \
-    qcompressor.cpp
+    qcompressor.cpp \
+    htmlentityparser.cpp
 #    regex_helper.cpp \
 #    ini.cpp \
 #    encodecvt.cpp \
@@ -38,7 +39,8 @@ HEADERS += \
         mainwindow.h \
     worker.h \
     httpsession.h \
-    qcompressor.h
+    qcompressor.h \
+    htmlentityparser.h
 #    encodecvt.h \
 #    ini.h \
 #    regex_helper.h \
