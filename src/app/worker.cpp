@@ -105,6 +105,10 @@ bool Worker::requestBookPages(const QString &urlStr)
                 linkAddr = strUrl.left(pos) + "/" + sublink;
                 break;
             }
+            case 3: {
+                linkAddr = sublink;
+                break;
+            }
             default:
                 break;
         }
