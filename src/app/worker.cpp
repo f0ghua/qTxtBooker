@@ -80,6 +80,7 @@ bool Worker::requestBookPages(const QString &urlStr)
     }
 
     QRegularExpression re(m_siteInfo.m_linkPattern);
+    re.setPatternOptions(QRegularExpression::InvertedGreedinessOption);
     QRegularExpressionMatchIterator i = re.globalMatch(indexContent);
 
     m_pageInfos.clear();
