@@ -10,6 +10,7 @@
 #include <QTextCodec>
 #include <QCoreApplication>
 #include <QTextDocument>
+#include <QTime>
 
 static const char * const KEY_LINK_ENCODE       = "encode";
 static const char * const KEY_LINK_STR_START    = "link_str_start";
