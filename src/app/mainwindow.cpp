@@ -54,10 +54,14 @@ void MainWindow::onIndexDownloaded()
 {
     ui->cbPageStart->clear();
     ui->cbPageEnd->clear();
+    int cbIndex = 0;
     for (int i = 0; i < m_worker->m_pageInfos.size(); i++) {
         const PageInfo &pi = m_worker->m_pageInfos[i];
-        ui->cbPageStart->insertItem(i, pi.m_title);
-        ui->cbPageEnd->insertItem(i, pi.m_title);
+        if (!pi.m_title.isEmpty()) {
+            ui->cbPageStart->insertItem(cbIndex, pi.m_title, i);
+            ui->cbPageEnd->insertItem(cbIndex, pi.m_title, i);
+            cbIndex++;
+        }
     }
 }
 
@@ -82,8 +86,8 @@ void MainWindow::on_pbReqPages_clicked()
 
 void MainWindow::on_pbPullPages_clicked()
 {
-    int start = ui->cbPageStart->currentIndex();
-    int end = ui->cbPageEnd->currentIndex();
+    int start = ui->cbPageStart->currentData().toInt();
+    int end = ui->cbPageEnd->currentData().toInt() + m_worker->m_siteInfo.m_pageContinueCount;
 
     QMetaObject::invokeMethod(m_worker,
                               "pullBookPages",

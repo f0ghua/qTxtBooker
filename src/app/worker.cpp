@@ -19,6 +19,7 @@ static const char * const KEY_LINK_PATTERN      = "link_pattern";
 static const char * const KEY_CONTENT_PATTERN   = "content_pattern";
 static const char * const KEY_INTERVAL          = "interval";
 static const char * const KEY_LINKTYPE          = "link_type";
+static const char * const KEY_PAGECTCOUNT       = "page_ctcount";
 static const char * const INDEX_PAGE_FNAME      = "./index.html";
 static const char * const BOOK_PAGE_FNAME       = "./page.html";
 static const char * const BOOK_SAVE_FNAME       = "./out.txt";
@@ -117,6 +118,16 @@ bool Worker::requestBookPages(const QString &urlStr)
 
         m_pageInfos.append(PageInfo(linkAddr, title));
         //qDebug() << link << title;
+
+        for (int i = 0; i < m_siteInfo.m_pageContinueCount; i++) {
+            int indexOfDot = linkAddr.lastIndexOf('.');
+            QString part1 = linkAddr.mid(0, indexOfDot);
+            QString part2 = linkAddr.mid(indexOfDot);
+            QString linkAddrPart2 = part1 + QString("_%1").arg(i+1) + part2;
+
+            m_pageInfos.append(PageInfo(linkAddrPart2, ""));
+        }
+
     }
 
     emit indexDownloaded();
@@ -196,8 +207,10 @@ bool Worker::pullBookPages(int start, int end)
         matchedContent.replace("@@", "@");
         matchedContent.replace("@", "\r\n");
 
-        out << pi.m_title;
-        out << "\r\n";
+        if (!pi.m_title.isEmpty()) {
+            out << pi.m_title;
+            out << "\r\n";
+        }
         out << matchedContent;
         out << "\r\n";
 
@@ -233,7 +246,7 @@ bool Worker::loadSiteConfigs(const QUrl &url)
             m_siteInfo.m_bookPattern = cfg->value(KEY_CONTENT_PATTERN).toString();
             m_siteInfo.m_interval = cfg->value(KEY_INTERVAL, 0).toInt();
             m_siteInfo.m_linkType = cfg->value(KEY_LINKTYPE, 0).toInt();
-
+            m_siteInfo.m_pageContinueCount = cfg->value(KEY_PAGECTCOUNT, 0).toInt();
             cfg->endGroup();
 
             isSupport = true;
