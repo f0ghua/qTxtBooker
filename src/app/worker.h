@@ -6,6 +6,7 @@
 #include <QUrl>
 
 class HttpSession;
+class QTextStream;
 
 struct SiteInfo {
     QUrl m_url;
@@ -16,6 +17,8 @@ struct SiteInfo {
     QString m_bookPattern;
     int m_interval = 0;
     int m_linkType = 0;
+    QString m_pageCtPattern;
+    int m_pageCtStart = 0;
     int m_pageContinueCount = 0;
 };
 
@@ -43,6 +46,7 @@ signals:
 public slots:
     void run();
     bool requestBookPages(const QString &urlStr);
+    bool pullBookPage(QTextStream &out, int index);
     bool pullBookPages(int start, int end);
 
 private:

@@ -19,6 +19,8 @@ static const char * const KEY_LINK_PATTERN      = "link_pattern";
 static const char * const KEY_CONTENT_PATTERN   = "content_pattern";
 static const char * const KEY_INTERVAL          = "interval";
 static const char * const KEY_LINKTYPE          = "link_type";
+static const char * const KEY_PAGECTPATTERN     = "page_ctpattern";
+static const char * const KEY_PAGECTSTART       = "page_ctstart";
 static const char * const KEY_PAGECTCOUNT       = "page_ctcount";
 static const char * const INDEX_PAGE_FNAME      = "./index.html";
 static const char * const BOOK_PAGE_FNAME       = "./page.html";
@@ -119,14 +121,14 @@ bool Worker::requestBookPages(const QString &urlStr)
         m_pageInfos.append(PageInfo(linkAddr, title));
         //qDebug() << link << title;
 
-        for (int i = 0; i < m_siteInfo.m_pageContinueCount; i++) {
-            int indexOfDot = linkAddr.lastIndexOf('.');
-            QString part1 = linkAddr.mid(0, indexOfDot);
-            QString part2 = linkAddr.mid(indexOfDot);
-            QString linkAddrPart2 = part1 + QString("_%1").arg(i+1) + part2;
+//        for (int i = 0; i < m_siteInfo.m_pageContinueCount; i++) {
+//            int indexOfDot = linkAddr.lastIndexOf('.');
+//            QString part1 = linkAddr.mid(0, indexOfDot);
+//            QString part2 = linkAddr.mid(indexOfDot);
+//            QString linkAddrPart2 = part1 + QString("_%1").arg(i+1) + part2;
 
-            m_pageInfos.append(PageInfo(linkAddrPart2, ""));
-        }
+//            m_pageInfos.append(PageInfo(linkAddrPart2, ""));
+//        }
 
     }
 
@@ -156,19 +158,20 @@ static inline void htmlRemoveEscape(QString &escapedStr)
 #endif
 }
 
-bool Worker::pullBookPages(int start, int end)
+bool Worker::pullBookPage(QTextStream &out, int index)
 {
-    QFile *outFile = new QFile(BOOK_SAVE_FNAME);
-    if (!outFile->open(QIODevice::WriteOnly | QIODevice::Text)) {
-        delete outFile;
-        return false;
-    }
-    QTextStream out(outFile);
+    const PageInfo &pi = m_pageInfos.at(index);
+    //const QString &urlStr = pi.m_linkAddr;
 
-    for (int index = start; index <= end; index++) {
-        const PageInfo &pi = m_pageInfos.at(index);
-        const QString &urlStr = pi.m_linkAddr;
+    auto getCtPageUrlStr = [](const QString &linkAddr, int index) {
+        int indexOfDot = linkAddr.lastIndexOf('.');
+        QString part1 = linkAddr.mid(0, indexOfDot);
+        QString part2 = linkAddr.mid(indexOfDot);
+        QString ctPageUrlStr = part1 + QString("_%1").arg(index) + part2;
+        return ctPageUrlStr;
+    };
 
+    auto pullPageContentByUrl = [&](const QString &urlStr, bool &isCtPageExist){
         QLOG_DEBUG() << "request page url =" << urlStr;
 
         QUrl url(urlStr);
@@ -178,6 +181,14 @@ bool Worker::pullBookPages(int start, int end)
             content = QString::fromStdString(ba.toStdString());
         } else {
             content = GBK2UTF8(ba);
+        }
+
+        // check if there continue page exist
+        if (!m_siteInfo.m_pageCtPattern.isEmpty()) {
+            QRegularExpression re(m_siteInfo.m_pageCtPattern);
+            re.setPatternOptions(QRegularExpression::InvertedGreedinessOption);
+            QRegularExpressionMatch match = re.match(content);
+            isCtPageExist = match.hasMatch();
         }
 
         //content.replace("\r\n", "");
@@ -197,7 +208,7 @@ bool Worker::pullBookPages(int start, int end)
         bool hasMatch = match.hasMatch(); // true
         if (!hasMatch) {
             QLOG_DEBUG() << "no content match of link" << pi.m_linkAddr;
-            break;
+            return QString();
         }
 
         QString matchedContent = match.captured(1);
@@ -207,14 +218,98 @@ bool Worker::pullBookPages(int start, int end)
         matchedContent.replace("@@", "@");
         matchedContent.replace("@", "\r\n");
 
-        if (!pi.m_title.isEmpty()) {
-            out << pi.m_title;
-            out << "\r\n";
-        }
+        return matchedContent;
+    };
+
+    bool isCtPageExist = false;
+    auto matchedContent = pullPageContentByUrl(pi.m_linkAddr, isCtPageExist);
+
+    if (!pi.m_title.isEmpty()) {
+        out << pi.m_title;
+        out << "\r\n";
+    }
+    out << matchedContent;
+    out << "\r\n";
+
+    int ctIndex = m_siteInfo.m_pageCtStart;
+    while (isCtPageExist) { // there must be continue pages
+        QString urlStr = getCtPageUrlStr(pi.m_linkAddr, ctIndex);
+        auto matchedContent = pullPageContentByUrl(urlStr, isCtPageExist);
+
         out << matchedContent;
         out << "\r\n";
 
-        emit pageDownloaded(index);
+        if (m_siteInfo.m_interval) {
+            msleep(m_siteInfo.m_interval);
+        }
+        ctIndex++;
+    }
+
+    emit pageDownloaded(index);
+    return true;
+}
+
+bool Worker::pullBookPages(int start, int end)
+{
+    QFile *outFile = new QFile(BOOK_SAVE_FNAME);
+    if (!outFile->open(QIODevice::WriteOnly | QIODevice::Text)) {
+        delete outFile;
+        return false;
+    }
+    QTextStream out(outFile);
+
+    for (int index = start; index <= end; index++) {
+//        const PageInfo &pi = m_pageInfos.at(index);
+//        const QString &urlStr = pi.m_linkAddr;
+
+//        QLOG_DEBUG() << "request page url =" << urlStr;
+
+//        QUrl url(urlStr);
+//        QByteArray ba = m_session->requestUrl2File(url, BOOK_PAGE_FNAME);
+//        QString content;
+//        if (m_siteInfo.m_encode == "UTF8") {
+//            content = QString::fromStdString(ba.toStdString());
+//        } else {
+//            content = GBK2UTF8(ba);
+//        }
+
+//        //content.replace("\r\n", "");
+//        content.replace("<br />", "@");
+//        //content.replace("<br/>", "@");
+//        //content.replace("</br>", "@");
+//        //content.replace("<br>", "@");
+//        content.replace(QRegularExpression("\r|\n|\t"), "");
+//        content.replace(QRegularExpression("</*br/*>"), "@");
+
+//        const QString &pattern = m_siteInfo.m_bookPattern;
+//        //qDebug() << pattern;
+//        //qDebug() << content;
+//        QRegularExpression re(pattern);
+//        re.setPatternOptions(QRegularExpression::DotMatchesEverythingOption | QRegularExpression::InvertedGreedinessOption);
+//        QRegularExpressionMatch match = re.match(content);
+//        bool hasMatch = match.hasMatch(); // true
+//        if (!hasMatch) {
+//            QLOG_DEBUG() << "no content match of link" << pi.m_linkAddr;
+//            break;
+//        }
+
+//        QString matchedContent = match.captured(1);
+
+//        htmlRemoveEscape(matchedContent);
+//        matchedContent.replace(" ", "");
+//        matchedContent.replace("@@", "@");
+//        matchedContent.replace("@", "\r\n");
+
+//        if (!pi.m_title.isEmpty()) {
+//            out << pi.m_title;
+//            out << "\r\n";
+//        }
+//        out << matchedContent;
+//        out << "\r\n";
+
+//        emit pageDownloaded(index);
+
+        pullBookPage(out, index);
 
         if (m_siteInfo.m_interval) {
             msleep(m_siteInfo.m_interval);
@@ -246,6 +341,8 @@ bool Worker::loadSiteConfigs(const QUrl &url)
             m_siteInfo.m_bookPattern = cfg->value(KEY_CONTENT_PATTERN).toString();
             m_siteInfo.m_interval = cfg->value(KEY_INTERVAL, 0).toInt();
             m_siteInfo.m_linkType = cfg->value(KEY_LINKTYPE, 0).toInt();
+            m_siteInfo.m_pageCtPattern = cfg->value(KEY_PAGECTPATTERN).toString();
+            m_siteInfo.m_pageCtStart = cfg->value(KEY_PAGECTSTART, 0).toInt();
             m_siteInfo.m_pageContinueCount = cfg->value(KEY_PAGECTCOUNT, 0).toInt();
             cfg->endGroup();
 
