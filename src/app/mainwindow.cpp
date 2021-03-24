@@ -10,7 +10,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    ui->leIndexAddr->setText("https://www.mywenxue.com/xiaoshuo/127/127690/Index.htm");
+    ui->leIndexAddr->setText("http://www.biqugewu.net/125_125367/");
 
     startWorker();
 }
