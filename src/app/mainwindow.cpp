@@ -29,7 +29,7 @@ void MainWindow::startWorker()
     QObject::connect(m_workThread, &QThread::started, m_worker, &Worker::run);
     QObject::connect(m_workThread, &QThread::finished, m_worker, &Worker::deleteLater);
     QObject::connect(m_workThread, &QThread::finished, m_workThread, &QThread::deleteLater);
-    //QObject::connect(this, &MainWindow::workStop, m_worker, &Worker::onWorkStop);
+    QObject::connect(this, &MainWindow::workStop, m_worker, &Worker::onWorkStop);
     QObject::connect(m_worker, &Worker::indexDownloaded, this, &MainWindow::onIndexDownloaded);
     QObject::connect(m_worker, &Worker::pageDownloaded, this, &MainWindow::onPageDownloaded);
 
@@ -39,7 +39,7 @@ void MainWindow::startWorker()
 
 void MainWindow::stopWorker()
 {
-    //emit workStop();
+    emit workStop();
 
     if(m_workThread && (!m_workThread->isFinished())) {
         m_workThread->quit();

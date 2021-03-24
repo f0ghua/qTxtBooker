@@ -26,6 +26,9 @@ private slots:
     void on_pbReqPages_clicked();
     void on_pbPullPages_clicked();
 
+signals:
+    void workStop();
+
 private:
     void startWorker();
     void stopWorker();

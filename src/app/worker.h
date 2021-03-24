@@ -48,12 +48,14 @@ public slots:
     bool requestBookPages(const QString &urlStr);
     bool pullBookPage(QTextStream &out, int index);
     bool pullBookPages(int start, int end);
+    void onWorkStop();
 
 private:
     void oldparser();
     bool loadSiteConfigs(const QUrl &url);
 
     HttpSession *m_session = nullptr;
+    bool m_isQuit = false;
 
 };
 

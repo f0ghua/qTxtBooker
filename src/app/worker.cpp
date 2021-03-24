@@ -314,11 +314,21 @@ bool Worker::pullBookPages(int start, int end)
         if (m_siteInfo.m_interval) {
             msleep(m_siteInfo.m_interval);
         }
+
+        QCoreApplication::processEvents();
+        if (m_isQuit) {
+            break;
+        }
     }
 
     outFile->close();
 
     return true;
+}
+
+void Worker::onWorkStop()
+{
+    m_isQuit = true;
 }
 
 bool Worker::loadSiteConfigs(const QUrl &url)
