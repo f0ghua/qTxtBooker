@@ -334,27 +334,27 @@ void Worker::onWorkStop()
 bool Worker::loadSiteConfigs(const QUrl &url)
 {
     const QString &domain = url.host();
-    QSettings *cfg = new QSettings("./config.ini", QSettings::IniFormat);
-    cfg->setIniCodec("UTF-8");
+    QSettings settings("./config.ini", QSettings::IniFormat);
+    settings.setIniCodec("UTF-8");
 
     QLOG_DEBUG() << "try to load config for host " << domain;
 
-    QStringList groups = cfg->childGroups();
+    QStringList groups = settings.childGroups();
     bool isSupport = false;
     foreach (const QString &group, groups) {
         if (group == domain) {
-            cfg->beginGroup(group);
-            m_siteInfo.m_encode = cfg->value(KEY_LINK_ENCODE, "UTF8").toString();
-            m_siteInfo.m_linkStart = cfg->value(KEY_LINK_STR_START).toString();
-            m_siteInfo.m_linkEnd = cfg->value(KEY_LINK_STR_END).toString();
-            m_siteInfo.m_linkPattern = cfg->value(KEY_LINK_PATTERN).toString();
-            m_siteInfo.m_bookPattern = cfg->value(KEY_CONTENT_PATTERN).toString();
-            m_siteInfo.m_interval = cfg->value(KEY_INTERVAL, 0).toInt();
-            m_siteInfo.m_linkType = cfg->value(KEY_LINKTYPE, 0).toInt();
-            m_siteInfo.m_pageCtPattern = cfg->value(KEY_PAGECTPATTERN).toString();
-            m_siteInfo.m_pageCtStart = cfg->value(KEY_PAGECTSTART, 0).toInt();
-            m_siteInfo.m_pageContinueCount = cfg->value(KEY_PAGECTCOUNT, 0).toInt();
-            cfg->endGroup();
+            settings.beginGroup(group);
+            m_siteInfo.m_encode = settings.value(KEY_LINK_ENCODE, "UTF8").toString();
+            m_siteInfo.m_linkStart = settings.value(KEY_LINK_STR_START).toString();
+            m_siteInfo.m_linkEnd = settings.value(KEY_LINK_STR_END).toString();
+            m_siteInfo.m_linkPattern = settings.value(KEY_LINK_PATTERN).toString();
+            m_siteInfo.m_bookPattern = settings.value(KEY_CONTENT_PATTERN).toString();
+            m_siteInfo.m_interval = settings.value(KEY_INTERVAL, 0).toInt();
+            m_siteInfo.m_linkType = settings.value(KEY_LINKTYPE, 0).toInt();
+            m_siteInfo.m_pageCtPattern = settings.value(KEY_PAGECTPATTERN).toString();
+            m_siteInfo.m_pageCtStart = settings.value(KEY_PAGECTSTART, 0).toInt();
+            m_siteInfo.m_pageContinueCount = settings.value(KEY_PAGECTCOUNT, 0).toInt();
+            settings.endGroup();
 
             isSupport = true;
             break;

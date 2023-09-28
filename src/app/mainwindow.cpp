@@ -2,6 +2,8 @@
 #include "ui_mainwindow.h"
 #include "worker.h"
 
+#include <QNetworkProxy>
+#include <QSettings>
 #include <QThread>
 #include <QDebug>
 
@@ -12,6 +14,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     ui->leIndexAddr->setText("http://www.biqugewu.net/125_125367/");
 
+    loadProxySettings();
     startWorker();
 }
 
@@ -19,6 +22,31 @@ MainWindow::~MainWindow()
 {
     stopWorker();
     delete ui;
+}
+
+void MainWindow::loadProxySettings()
+{
+    QSettings settings("./config.ini", QSettings::IniFormat);
+    settings.setIniCodec("UTF-8");
+
+    QStringList groups = settings.childGroups();
+    settings.beginGroup("common");
+    QString host = settings.value("host").toString();
+    QString port = settings.value("port").toString();
+    QString username = settings.value("username").toString();
+    QString password = settings.value("password").toString();
+    settings.endGroup();
+
+    if (!host.isEmpty()) {
+        QNetworkProxy proxy;
+        proxy.setType(QNetworkProxy::Socks5Proxy);
+        proxy.setHostName(host);
+        proxy.setPort(port.toInt());
+        qDebug() << QString("set proxy to %1:%2").arg(host).arg(port);
+        proxy.setUser(username);
+        proxy.setPassword(password);
+        QNetworkProxy::setApplicationProxy(proxy);
+    }
 }
 
 void MainWindow::startWorker()

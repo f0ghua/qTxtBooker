@@ -32,6 +32,7 @@ signals:
 private:
     void startWorker();
     void stopWorker();
+    void loadProxySettings();
 
     Ui::MainWindow *ui;
     Worker *m_worker = NULL;
