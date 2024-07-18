@@ -66,6 +66,10 @@ bool Worker::requestBookPages(const QString &urlStr)
         return false;
 
     QByteArray ba = m_session->requestUrl2File(url, INDEX_PAGE_FNAME);
+    if (ba.isEmpty()) {
+        QLOG_ERROR() << "index file is NULL";
+        return false;
+    }
     if ((static_cast<uint8_t>(ba.at(0)) == 0x1F)
             && (static_cast<uint8_t>(ba.at(1)) == 0x8B)) {
         // gzip file is detected
