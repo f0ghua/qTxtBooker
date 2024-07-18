@@ -35,6 +35,7 @@ void HttpSession::fileDownloaded(QNetworkReply *reply)
 QByteArray HttpSession::requestUrl2File(QUrl url, const QString &fileName)
 {
     QNetworkRequest request(url);
+    request.setAttribute(QNetworkRequest::FollowRedirectsAttribute, true);
     m_webCtrl.get(request);
 
     QEventLoop loop;
