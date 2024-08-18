@@ -20,6 +20,7 @@ struct SiteInfo {
     QString m_pageCtPattern;
     int m_pageCtStart = 0;
     int m_pageContinueCount = 0;
+    QString m_formatPageLink;
 };
 
 struct PageInfo {

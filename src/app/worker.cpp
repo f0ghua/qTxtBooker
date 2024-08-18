@@ -22,6 +22,7 @@ static const char * const KEY_LINKTYPE          = "link_type";
 static const char * const KEY_PAGECTPATTERN     = "page_ctpattern";
 static const char * const KEY_PAGECTSTART       = "page_ctstart";
 static const char * const KEY_PAGECTCOUNT       = "page_ctcount";
+static const char * const KEY_FMTPAGELINK       = "page_fmtlink";
 static const char * const INDEX_PAGE_FNAME      = "./index.html";
 static const char * const BOOK_PAGE_FNAME       = "./page.html";
 static const char * const BOOK_SAVE_FNAME       = "./out.txt";
@@ -116,6 +117,15 @@ bool Worker::requestBookPages(const QString &urlStr)
             }
             case 3: {
                 linkAddr = sublink;
+                break;
+            }
+            case 4: {
+                if (!m_siteInfo.m_formatPageLink.isEmpty()) {
+                    linkAddr = m_siteInfo.m_formatPageLink.arg(sublink);
+                } else {
+                    QLOG_ERROR() << "No page link format was defined";
+                }
+
                 break;
             }
             default:
@@ -358,6 +368,7 @@ bool Worker::loadSiteConfigs(const QUrl &url)
             m_siteInfo.m_pageCtPattern = settings.value(KEY_PAGECTPATTERN).toString();
             m_siteInfo.m_pageCtStart = settings.value(KEY_PAGECTSTART, 0).toInt();
             m_siteInfo.m_pageContinueCount = settings.value(KEY_PAGECTCOUNT, 0).toInt();
+            m_siteInfo.m_formatPageLink = settings.value(KEY_FMTPAGELINK).toString();
             settings.endGroup();
 
             isSupport = true;
