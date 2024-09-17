@@ -48,6 +48,44 @@ static inline QString GBK2UTF8(const QByteArray &ba)
     return QString::fromStdString(baUtf8.toStdString());
 }
 
+static QString getPageUrl(const SiteInfo &si, const QString &sublink)
+{
+    QString linkAddr;
+    const QUrl &url = si.m_url;
+    switch (si.m_linkType) {
+        case 0: {
+            linkAddr = url.scheme() + "://" + url.host() + sublink;
+            break;
+        }
+        case 1: {
+            linkAddr = url.toString() + sublink;
+            break;
+        }
+        case 2: {
+            QString strUrl = url.toString();
+            int pos = strUrl.lastIndexOf('/');
+            linkAddr = strUrl.left(pos) + "/" + sublink;
+            break;
+        }
+        case 3: {
+            linkAddr = sublink;
+            break;
+        }
+        case 4: {
+            if (!si.m_formatPageLink.isEmpty()) {
+                linkAddr = si.m_formatPageLink.arg(sublink);
+            } else {
+                QLOG_ERROR() << "No page link format was defined";
+            }
+
+            break;
+        }
+        default:
+            break;
+    }
+    return linkAddr;
+}
+
 Worker::Worker(QObject *parent) : QObject(parent)
 {
 
@@ -185,7 +223,7 @@ bool Worker::pullBookPage(QTextStream &out, int index)
         return ctPageUrlStr;
     };
 
-    auto pullPageContentByUrl = [&](const QString &urlStr, bool &isCtPageExist){
+    auto pullPageContentByUrl = [&](const QString &urlStr, QString &ctPageUrl){
         QLOG_DEBUG() << "request page url =" << urlStr;
 
         QUrl url(urlStr);
@@ -197,12 +235,15 @@ bool Worker::pullBookPage(QTextStream &out, int index)
             content = GBK2UTF8(ba);
         }
 
+        ctPageUrl.clear();
         // check if there continue page exist
         if (!m_siteInfo.m_pageCtPattern.isEmpty()) {
             QRegularExpression re(m_siteInfo.m_pageCtPattern);
             re.setPatternOptions(QRegularExpression::InvertedGreedinessOption);
             QRegularExpressionMatch match = re.match(content);
-            isCtPageExist = match.hasMatch();
+            if (match.hasMatch()) {
+                ctPageUrl = match.captured(1);
+            }
         }
 
         //content.replace("\r\n", "");
@@ -221,7 +262,7 @@ bool Worker::pullBookPage(QTextStream &out, int index)
         QRegularExpressionMatch match = re.match(content);
         bool hasMatch = match.hasMatch(); // true
         if (!hasMatch) {
-            QLOG_DEBUG() << "no content match of link" << pi.m_linkAddr;
+            QLOG_DEBUG() << "no content match of link" << urlStr;
             return QString();
         }
 
@@ -235,8 +276,8 @@ bool Worker::pullBookPage(QTextStream &out, int index)
         return matchedContent;
     };
 
-    bool isCtPageExist = false;
-    auto matchedContent = pullPageContentByUrl(pi.m_linkAddr, isCtPageExist);
+    QString ctPageUrl;
+    auto matchedContent = pullPageContentByUrl(pi.m_linkAddr, ctPageUrl);
 
     if (!pi.m_title.isEmpty()) {
         out << pi.m_title;
@@ -245,10 +286,12 @@ bool Worker::pullBookPage(QTextStream &out, int index)
     out << matchedContent;
     out << "\r\n";
 
-    int ctIndex = m_siteInfo.m_pageCtStart;
-    while (isCtPageExist) { // there must be continue pages
-        QString urlStr = getCtPageUrlStr(pi.m_linkAddr, ctIndex);
-        auto matchedContent = pullPageContentByUrl(urlStr, isCtPageExist);
+    qDebug() << "ctPageUrl = " << ctPageUrl;
+    //int ctIndex = m_siteInfo.m_pageCtStart;
+    while (!ctPageUrl.isEmpty()) { // there must be continue pages
+        QString urlStr = getPageUrl(m_siteInfo, ctPageUrl);
+        //getCtPageUrlStr(pi.m_linkAddr, ctIndex);
+        auto matchedContent = pullPageContentByUrl(urlStr, ctPageUrl);
 
         out << matchedContent;
         out << "\r\n";
@@ -256,7 +299,7 @@ bool Worker::pullBookPage(QTextStream &out, int index)
         if (m_siteInfo.m_interval) {
             msleep(m_siteInfo.m_interval);
         }
-        ctIndex++;
+        //ctIndex++;
     }
 
     emit pageDownloaded(index);
